@@ -9,6 +9,7 @@ trait=${5} # trait name, if need to be left to decide as a trait_PGSxxx format f
 pfile_dir=${6} # Directory where the pfiles are
 pfile=${7} # Name of plink fileset midfix AFTER "chr#_" [ex: chr22_freeze3_dosages_PAIR.pgen = freeze3_dosages_PAIR]
 rm_amb=${8} # T, or F to remove ambiguous variants. Default is T.
+impt=${9} # T, or F for PLINK to impute missing genotypes with allele frequencies. Default is F.
 # script_path=${7} # Full path to scripts
 # bin_path=${8} # Full path to bin
 
@@ -283,13 +284,18 @@ do
     fi 
     
     # Calculated PRS using PLINK2
-    #./plink2_mar --pfile chr${CHR}_freeze2_merged_overlapped_sites_INFOupdated \
-    #             --score ${weight} list-variants \
-    #             --out chr${CHR}_${trait}_prs
+    ## default is not to impute missing genotypes in the dataset
+    if [[ "${impt}" == "F" ]]
+    then
     ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
                  --score "${dest2}"/"${weight}" list-variants no-mean-imputation \
-                 --out "${dest2}"/chr"${CHR}"_${trait}_prs    
-
+                 --out "${dest2}"/chr"${CHR}"_${trait}_prs
+    else
+    ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+                 --score "${dest2}"/"${weight}" list-variants \
+                 --out "${dest2}"/chr"${CHR}"_${trait}_prs
+    fi
+    
 
     # double checking if all weight SNPs were utilized
     nsnp_w=$(wc -l "${dest2}"/"${weight}" | cut -d " " -f 1)
