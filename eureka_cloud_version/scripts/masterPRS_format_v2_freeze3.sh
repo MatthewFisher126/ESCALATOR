@@ -4,12 +4,12 @@
 reform=${1} # using reformatting script designed for pgs catalog cleanup; 1, 2, 3, or F
 indir=${2}
 infile=${3} # input weight file
-dest=${4} # destination google bucket to store output
+dest=${4} # destination directory
 trait=${5} # trait name, if need to be left to decide as a trait_PGSxxx format from the input, input "unknown"
 pfile_dir=${6} # Directory where the pfiles are
 pfile=${7} # Name of plink fileset midfix AFTER "chr#_" [ex: chr22_freeze3_dosages_PAIR.pgen = freeze3_dosages_PAIR]
 rm_amb=${8} # T, or F to remove ambiguous variants. Default is T.
-impt=${9} # T, or F for PLINK to impute missing genotypes with allele frequencies. Default is F.
+freqfile=${9} # 'NA', or name of allele frequency file under ${indr}/ to impute missing genotypes by PLINK. Not required for non-missingness dataset, or dataset with N>50 which plink will automatically calculate frequencies.
 # script_path=${7} # Full path to scripts
 # bin_path=${8} # Full path to bin
 
@@ -59,6 +59,10 @@ then
 else
     echo "Variants with ambiguous allele code (e.g. A/T, C/G) will be removed." 2>&1 | tee -a "${log}"
     rm_amb="T"
+fi
+if [ "${freqfile}" != "NA" ] && [ "${freqfile}" != "" ]
+then
+    echo "User has submitted allele frequency file ${freqfile} for PLINK to impute missing genotypes. " 2>&1 | tee -a "${log}"
 fi
 echo '....................................................................................................' 2>&1 | tee -a "${log}"
 echo -e '\n\n' 2>&1 | tee -a "${log}"
@@ -284,14 +288,19 @@ do
     fi 
     
     # Calculated PRS using PLINK2
-    ## default is not to impute missing genotypes in the dataset
-    if [[ "${impt}" == "F" ]]
+    ## default: to impute missing genotypes in the dataset by PLINK, based on allele frequency
+    ## would require sample size >50, otherwise either need to manually submit an allele frequency file or error out
+    #${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+    #             --score "${dest2}"/"${weight}" list-variants no-mean-imputation \
+    #             --out "${dest2}"/chr"${CHR}"_${trait}_prs
+    if [ "${freqfile}" != "NA" ] && [ "${freqfile}" != "" ] 
     then
-    ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
-                 --score "${dest2}"/"${weight}" list-variants no-mean-imputation \
-                 --out "${dest2}"/chr"${CHR}"_${trait}_prs
+        ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+                 --score "${dest2}"/"${weight}" list-variants \
+                 --read-freq "${indir}"/"${freqfile}" \
+                 --out "${dest2}"/chr"${CHR}"_${trait}_prs    
     else
-    ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+        ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
                  --score "${dest2}"/"${weight}" list-variants \
                  --out "${dest2}"/chr"${CHR}"_${trait}_prs
     fi
@@ -305,6 +314,13 @@ do
         echo "There still are weight SNPs being discarded in PLINK --score after being cleaned on CHR${CHR}. Can check the log file for trouble shooting." 2>&1 | tee -a "${log}"
         #exit 1
     fi
+
+    # scale PLINK score back, which is averaged by number of variants*2 
+    # when imputed (i.e. no missingness, or missingness taken care of by PLINK), the denominator is the same for all individuals
+    # unlike PLINK v1.9, PLINK v2 that accepts pfile does not accept 'sum' argument. Thus, scaling back needs to be performed as below
+    /bin/python3 ${script_path}/reverse_plink_scale.py ${snp_used} "${dest2}"/chr"${CHR}"_${trait}_prs.sscore "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2
+    rm "${dest2}"/chr"${CHR}"_${trait}_prs.sscore
+    mv "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2 "${dest2}"/chr"${CHR}"_${trait}_prs.sscore
     
     # remove the pgen file for step 3
     #rm chr${CHR}_freeze2_merged_overlapped_sites_INFOupdated.*
