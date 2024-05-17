@@ -12,6 +12,9 @@ for(filename in as.character(score.list$V1)){
   coln <- ncol(infile)
   if(i==1){ # on the first file
     scores <- infile
+    scores$ALLELE_CT <- as.numeric(scores$ALLELE_CT)
+    scores$NAMED_ALLELE_DOSAGE_SUM <- as.numeric(scores$NAMED_ALLELE_DOSAGE_SUM)
+    scores$SCORE <- as.numeric(scores$SCORE)
     if(coln==5){
       # has FID present
       scores$tempID <- paste(scores$FID, scores$IID, sep=':')
