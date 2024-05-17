@@ -32,7 +32,7 @@ for(filename in as.character(score.list$V1)){
       temp_dsum <- as.numeric(infile$NAMED_ALLELE_DOSAGE_SUM[match(scores$tempID, infile$tempID)]) + scores$NAMED_ALLELE_DOSAGE_SUM
       scores$NAMED_ALLELE_DOSAGE_SUM <- temp_dsum # update sum of dosages of the risk alleles before imputation
       temp_score <- as.numeric(infile$SCORE[match(scores$tempID, infile$tempID)]) + scores$SCORE
-      scores$SCORE <- as.numeric(temp_score2)
+      scores$SCORE <- as.numeric(temp_score)
     }else if(coln==4){
       temp_ct <- as.numeric(infile$ALLELE_CT[match(scores$IID, infiles$IID)]) + scores$ALLELE_CT
       scores$ALLELE_CT <- temp_ct
