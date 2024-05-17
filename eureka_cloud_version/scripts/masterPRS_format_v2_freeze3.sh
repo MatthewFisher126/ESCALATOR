@@ -128,11 +128,13 @@ then
         echo "Didn't detect the genome build of the input file." 2>&1 | tee -a "${log}"
         # gsutil -q cp ${log} ${dest2}/
         # cp ${log} ${dest2}/
+        rm -r "${dest2}"
         exit 1
     else
         echo "Reformatting of the input file failed." 2>&1 | tee -a "${log}"
         # gsutil -q cp ${log} ${dest2}/
         # cp ${log} ${dest2}/
+        rm -r "${dest2}"
         exit 1
     fi
     mv "${indir}"/"${newinfile}" "${dest2}"/"${newinfile}"
@@ -158,6 +160,7 @@ else
         echo "Unknown genome build of the input file." 2>&1 | tee -a "${log}"
         # gsutil -q cp ${log} ${dest2}/
         # cp ${log} ${dest2}/
+        rm -r "${dest2}"
         exit 1
     fi
     cp "${indir}"/"${newinfile}" "${dest2}"/"${newinfile}"
@@ -349,6 +352,7 @@ then
     echo "No variants are left for PRS score." 2>&1 | tee -a "${log}"
     # gsutil -q cp ${log} ${dest}/
     # cp ${log} ${dest}/
+    rm -r "${dest2}"
     exit 1
 fi
 
