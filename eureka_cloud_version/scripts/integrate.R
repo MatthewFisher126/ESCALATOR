@@ -11,6 +11,7 @@ for(filename in as.character(score.list$V1)){
   infile <- read.table(filename, colClasses="character", header=T)
   coln <- ncol(infile)
   if(i==1){ # on the first file
+    scores <- infile
     if(coln==5){
       # has FID present
       scores$tempID <- paste(scores$FID, scores$IID, sep=':')
