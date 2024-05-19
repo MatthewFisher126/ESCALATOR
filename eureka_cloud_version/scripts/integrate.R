@@ -47,9 +47,9 @@ for(filename in as.character(score.list$V1)){
 }
 
 if(ncol(scores)==6){ # with FID, and then the extra column of tempID
-  scores2 <- scores[,c("FID", "IID", "ALLELE_CT", "NAMED_ALLELE_DOSAGE_SUM", "SCORE")
+  scores2 <- scores[,c("FID", "IID", "ALLELE_CT", "NAMED_ALLELE_DOSAGE_SUM", "SCORE")]
 }else{
   scores2 <- scores
 }
 
-write.table(scores2, output.name, col.names=F, row.names=F, quote=F, sep='\t')
+write.table(scores2, output.name, col.names=T, row.names=F, quote=F, sep='\t')
