@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ## system input variables
-reform=${1} # using reformatting script designed for pgs catalog cleanup; 1, 2, 3, or F
+reform=${1} # using reformatting script designed for pgs catalog cleanup; 1, 2, 3
 indir=${2}
 infile=${3} # input weight file
 dest=${4} # destination directory
@@ -106,7 +106,7 @@ fi
 if [ "${reform}" != "F" ]
 then
     echo "-----Step 1: Reformatting the input weight file-----" 2>&1 | tee -a "${log}"
-    /bin/python3 "${script_path}"/organize_pgs_format_v2.py "${reform}" "${indir}"/"${infile}"
+    /bin/python3 "${script_path}"/organize_pgs_format_v3.py "${reform}" "${indir}"/"${infile}"
     echo -e "-----Done Step 1-----\n\n" 2>&1 | tee -a "${log}"
     #newname=$(echo ${infile} | sed 's/\.txt/_reformated\.txt/g' | sed 's/\.gz//g')
     newname38=$(echo "${infile}" | sed 's/\.txt/_hg38_reformated\.txt/g' | sed 's/\.gz//g')
