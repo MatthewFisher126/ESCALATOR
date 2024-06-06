@@ -68,6 +68,13 @@ echo '..........................................................................
 echo -e '\n\n' 2>&1 | tee -a "${log}"
 ## end of report params
 
+# if the input weight file does not end with '.txt' or '.txt.gz', add the extension to avoid error outputing from organize_pgs_format_v3.py
+if [[ ${infile} != *.txt ]] && [[ ${infile} != *.txt.gz ]]
+then
+    mv ${infile} ${infile}.txt
+    infile=${infile}.txt
+fi
+
 
 
 # predefined path for scripts and bin 
@@ -86,11 +93,11 @@ bin_path='/usr/bin/'
 # extract trait or PGS number to be part of the output prefix
 if [ "${trait}" = "unknown" ]
 then
-    echo "-----Step 0: Getting pgs name-----" 
+    echo "-----Step 0: Getting pgs name-----" 2>&1 | tee -a "${log}"
     trait=$(/bin/python3 ${script_path}/getname_format_v2.py "${infile}") 
-    echo -e "-----Done Step 0-----\n\n" 
+    echo -e "-----Done Step 0-----\n\n" 2>&1 | tee -a "${log}"
 else
-    echo -e "-----Skipping Step 0: Getting pgs name-----\n\n"
+    echo -e "-----Skipping Step 0: Getting pgs name-----\n\n" 2>&1 | tee -a "${log}"
 fi
 
 
