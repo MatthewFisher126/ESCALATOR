@@ -68,7 +68,7 @@ echo '..........................................................................
 echo -e '\n\n' 2>&1 | tee -a "${log}"
 ## end of report params
 
-# if the input weight file does not end with '.txt' or '.txt.gz', add the extension to avoid error outputing from organize_pgs_format_v3.py
+# if the input weight file does not end with '.txt' or '.txt.gz', add the extension to avoid error outputing from organize_pgs_format_v4.py
 if [[ ${infile} != *.txt ]] && [[ ${infile} != *.txt.gz ]]
 then
     mv ${infile} ${infile}.txt
@@ -106,7 +106,7 @@ fi
 if [ "${reform}" != "F" ]
 then
     echo "-----Step 1: Reformatting the input weight file-----" 2>&1 | tee -a "${log}"
-    /bin/python3 "${script_path}"/organize_pgs_format_v3.py "${reform}" "${indir}"/"${infile}"
+    /bin/python3 "${script_path}"/organize_pgs_format_v4.py "${reform}" "${indir}"/"${infile}"
     echo -e "-----Done Step 1-----\n\n" 2>&1 | tee -a "${log}"
     #newname=$(echo ${infile} | sed 's/\.txt/_reformated\.txt/g' | sed 's/\.gz//g')
     newname38=$(echo "${infile}" | sed 's/\.txt/_hg38_reformated\.txt/g' | sed 's/\.gz//g')
