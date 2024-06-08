@@ -328,7 +328,7 @@ do
     # scale PLINK score back, which is averaged by number of variants*2 
     # when imputed (i.e. no missingness, or missingness taken care of by PLINK), the denominator is the same for all individuals
     # unlike PLINK v1.9, PLINK v2 that accepts pfile does not accept 'sum' argument. Thus, scaling back needs to be performed as below
-    /bin/python3 ${script_path}/reverse_plink_scale.py ${snp_used} "${dest2}"/chr"${CHR}"_${trait}_prs.sscore "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2
+    /bin/python3 ${script_path}/reverse_plink_scale.py ${nsnp_used} "${dest2}"/chr"${CHR}"_${trait}_prs.sscore "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2
     rm "${dest2}"/chr"${CHR}"_${trait}_prs.sscore
     mv "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2 "${dest2}"/chr"${CHR}"_${trait}_prs.sscore
     
