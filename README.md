@@ -28,7 +28,7 @@ singularity run-help <container_name>.sif
 
 ## Using ESCALATOR by download: 
 
-**Note: You will need to download this repo and edit the masterPRS_format_v2_freeze3.sh. Uncomment script_path and bin_path on lines 11 and 12 and comment out the same variables on lines 21 and 22.**
+**Note: You will need to download this repo and edit the masterPRS_v4.sh. Uncomment "script_path" and "bin_path" on lines 11 and 12 and comment out the same variables on lines 21 and 22.**
 
 You will also need to unzip the prs_pipeline_bin.tar.gz file to access liftover and plink. 
 
