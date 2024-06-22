@@ -1,14 +1,15 @@
 #!/bin/sh
 
 ## system input variables
-reform=${1} # using reformatting script designed for pgs catalog cleanup; 1, 2, 3, or F
+reform=${1} # using reformatting script designed for pgs catalog cleanup; 1, 2, 3
 indir=${2}
 infile=${3} # input weight file
-dest=${4} # destination google bucket to store output
+dest=${4} # destination directory
 trait=${5} # trait name, if need to be left to decide as a trait_PGSxxx format from the input, input "unknown"
 pfile_dir=${6} # Directory where the pfiles are
 pfile=${7} # Name of plink fileset midfix AFTER "chr#_" [ex: chr22_freeze3_dosages_PAIR.pgen = freeze3_dosages_PAIR]
 rm_amb=${8} # T, or F to remove ambiguous variants. Default is T.
+freqfile=${9} # 'NA', or name of allele frequency file under ${indr}/ to impute missing genotypes by PLINK. Not required for non-missingness dataset, or dataset with N>50 which plink will automatically calculate frequencies.
 # script_path=${7} # Full path to scripts
 # bin_path=${8} # Full path to bin
 
@@ -59,9 +60,20 @@ else
     echo "Variants with ambiguous allele code (e.g. A/T, C/G) will be removed." 2>&1 | tee -a "${log}"
     rm_amb="T"
 fi
+if [ "${freqfile}" != "NA" ] && [ "${freqfile}" != "" ]
+then
+    echo "User has submitted allele frequency file ${freqfile} for PLINK to impute missing genotypes. " 2>&1 | tee -a "${log}"
+fi
 echo '....................................................................................................' 2>&1 | tee -a "${log}"
 echo -e '\n\n' 2>&1 | tee -a "${log}"
 ## end of report params
+
+# if the input weight file does not end with '.txt' or '.txt.gz', add the extension to avoid error outputing from organize_pgs_format_v4.py
+if [[ ${infile} != *.txt ]] && [[ ${infile} != *.txt.gz ]]
+then
+    mv ${infile} ${infile}.txt
+    infile=${infile}.txt
+fi
 
 
 
@@ -81,11 +93,11 @@ bin_path='/usr/bin/'
 # extract trait or PGS number to be part of the output prefix
 if [ "${trait}" = "unknown" ]
 then
-    echo "-----Step 0: Getting pgs name-----" 
+    echo "-----Step 0: Getting pgs name-----" 2>&1 | tee -a "${log}"
     trait=$(/bin/python3 ${script_path}/getname_format_v2.py "${infile}") 
-    echo -e "-----Done Step 0-----\n\n" 
+    echo -e "-----Done Step 0-----\n\n" 2>&1 | tee -a "${log}"
 else
-    echo -e "-----Skipping Step 0: Getting pgs name-----\n\n"
+    echo -e "-----Skipping Step 0: Getting pgs name-----\n\n" 2>&1 | tee -a "${log}"
 fi
 
 
@@ -94,7 +106,7 @@ fi
 if [ "${reform}" != "F" ]
 then
     echo "-----Step 1: Reformatting the input weight file-----" 2>&1 | tee -a "${log}"
-    /bin/python3 "${script_path}"/organize_pgs_format_v2.py "${reform}" "${indir}"/"${infile}"
+    /bin/python3 "${script_path}"/organize_pgs_format_v4.py "${reform}" "${indir}"/"${infile}"
     echo -e "-----Done Step 1-----\n\n" 2>&1 | tee -a "${log}"
     #newname=$(echo ${infile} | sed 's/\.txt/_reformated\.txt/g' | sed 's/\.gz//g')
     newname38=$(echo "${infile}" | sed 's/\.txt/_hg38_reformated\.txt/g' | sed 's/\.gz//g')
@@ -123,11 +135,13 @@ then
         echo "Didn't detect the genome build of the input file." 2>&1 | tee -a "${log}"
         # gsutil -q cp ${log} ${dest2}/
         # cp ${log} ${dest2}/
+        rm -r "${dest2}"
         exit 1
     else
         echo "Reformatting of the input file failed." 2>&1 | tee -a "${log}"
         # gsutil -q cp ${log} ${dest2}/
         # cp ${log} ${dest2}/
+        rm -r "${dest2}"
         exit 1
     fi
     mv "${indir}"/"${newinfile}" "${dest2}"/"${newinfile}"
@@ -153,6 +167,7 @@ else
         echo "Unknown genome build of the input file." 2>&1 | tee -a "${log}"
         # gsutil -q cp ${log} ${dest2}/
         # cp ${log} ${dest2}/
+        rm -r "${dest2}"
         exit 1
     fi
     cp "${indir}"/"${newinfile}" "${dest2}"/"${newinfile}"
@@ -283,13 +298,23 @@ do
     fi 
     
     # Calculated PRS using PLINK2
-    #./plink2_mar --pfile chr${CHR}_freeze2_merged_overlapped_sites_INFOupdated \
-    #             --score ${weight} list-variants \
-    #             --out chr${CHR}_${trait}_prs
-    ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
-                 --score "${dest2}"/"${weight}" list-variants no-mean-imputation \
+    ## default: to impute missing genotypes in the dataset by PLINK, based on allele frequency
+    ## would require sample size >50, otherwise either need to manually submit an allele frequency file or error out
+    #${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+    #             --score "${dest2}"/"${weight}" list-variants no-mean-imputation \
+    #             --out "${dest2}"/chr"${CHR}"_${trait}_prs
+    if [ "${freqfile}" != "NA" ] && [ "${freqfile}" != "" ] 
+    then
+        ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+                 --score "${dest2}"/"${weight}" list-variants \
+                 --read-freq "${indir}"/"${freqfile}" \
                  --out "${dest2}"/chr"${CHR}"_${trait}_prs    
-
+    else
+        ${bin_path}/plink2_mar --pfile "${pfile_dir}"/chr"${CHR}"_${pfile} \
+                 --score "${dest2}"/"${weight}" list-variants \
+                 --out "${dest2}"/chr"${CHR}"_${trait}_prs
+    fi
+    
 
     # double checking if all weight SNPs were utilized
     nsnp_w=$(wc -l "${dest2}"/"${weight}" | cut -d " " -f 1)
@@ -299,6 +324,13 @@ do
         echo "There still are weight SNPs being discarded in PLINK --score after being cleaned on CHR${CHR}. Can check the log file for trouble shooting." 2>&1 | tee -a "${log}"
         #exit 1
     fi
+
+    # scale PLINK score back, which is averaged by number of variants*2 
+    # when imputed (i.e. no missingness, or missingness taken care of by PLINK), the denominator is the same for all individuals
+    # unlike PLINK v1.9, PLINK v2 that accepts pfile does not accept 'sum' argument. Thus, scaling back needs to be performed as below
+    /bin/python3 ${script_path}/reverse_plink_scale.py ${nsnp_used} "${dest2}"/chr"${CHR}"_${trait}_prs.sscore "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2
+    rm "${dest2}"/chr"${CHR}"_${trait}_prs.sscore
+    mv "${dest2}"/chr"${CHR}"_${trait}_prs.sscore2 "${dest2}"/chr"${CHR}"_${trait}_prs.sscore
     
     # remove the pgen file for step 3
     #rm chr${CHR}_freeze2_merged_overlapped_sites_INFOupdated.*
@@ -327,6 +359,7 @@ then
     echo "No variants are left for PRS score." 2>&1 | tee -a "${log}"
     # gsutil -q cp ${log} ${dest}/
     # cp ${log} ${dest}/
+    rm -r "${dest2}"
     exit 1
 fi
 

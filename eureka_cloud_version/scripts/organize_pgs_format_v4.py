@@ -18,18 +18,22 @@ build_field_dict = { # catalog version : build header
     "1": "Original Genome Build",
     "2": "genome_build",
     "3":"HmPOS_build",
+    "NA": "Original Genome Build"
 }
 
 filename = sys.argv[-1]
 version = sys.argv[-2]  # pgs catalog format version, 1, 2, or 3(their harmonized)
+dbsnp = sys.argv[-3] # where bed_chr_*.bed.gz are located
 
 ## pre-defined path
-dbsnp = "gs://hdchpcprodtis1-staging/Reference/dbSNP"
+#dbsnp = "gs://hdchpcprodtis1-staging/Reference/dbSNP"
+dbsnp = dbsnp.rstrip() # dbsnp bed files to use only to fill in chr and bp positions if missing, but rsIDs are present. Missing allelic code info will not be determined in this script as dbSNP can have multiple alleles for one rsID variant
+#momentarily retired: pipeline does not covert dbsnp IDs to chromosome and bp anymore, due to large size of dbsnp bed files.
 
 ## assert params
 if not version in ["1", "2", "3"]:
     print(
-        "Unrecognized params for format version. Will detect version from the headers."
+        "Unrecognized params for format version. Will momentarily assume as version2 and confirm by searching the headers."
     )
     version = "NA"
 
@@ -146,13 +150,14 @@ for ii, line in enumerate(infile):
 if not pastheader:
     print("File format error. Check the column names etc. for the input weight file.")
 
+# below is momentarily retired. dbsnp is not provided in the container.
 # if no rs or bp, but rsID, then need to update the position info from dbSNP hg38
 if flag_dbsnp:
     snp2pos = {}  # a dict of rsID:chr_bp
     for chr in range(1, 23):
         # os.system("gsutil -q cp gs://hdchpcprodtis1-staging/mlin/dbSNP/bed_chr_" + str(chr) + ".bed.gz .")
-        os.system("gsutil -mq cp " + dbsnp + "/bed_chr_" + str(chr) + ".bed.gz .")
-        for line in gzip.open("bed_chr_" + str(chr) + ".bed.gz"):
+        #os.system("gsutil -mq cp " + dbsnp + "/bed_chr_" + str(chr) + ".bed.gz .")
+        for line in gzip.open(dbsnp + "/bed_chr_" + str(chr) + ".bed.gz"):
             line = line.strip().split()
             if line[3] in rs2otherfields:
                 snp2pos[line[3]] = "_".join([line[0].replace("chr", ""), line[2]])
