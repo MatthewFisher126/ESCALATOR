@@ -1,12 +1,13 @@
 # ESCALATOR README
 
-Feel free to download ESCALATOR itself from this github page or you can make it into a container. The tool/container will work in a SLURM environment or locally but it is recommended to use in a SLURM environment if your data set is large.  
+This repo holds the scripts and the singulairty def file of ESCALATOR. To directly download a the ESCALATOR singularity container, or have a general overview of ESCALATOR introduction and its usage, visit [the general repo](https://github.com/menglin44/ESCALATOR) and its [vignette](https://github.com/menglin44/ESCALATOR/blob/main/escalator_container/ESCALATOR_container_readme.pdf).
 
-## Using the singularity container:
+
+## If to create a singularity container:
 
 You can download the escalator.def file and create the container on https://cloud.sylabs.io/. You will also need singularity installed locally or on your HPC. 
 
-Running the container is almost the same as above but you will specify the container name, the wrapper script, and then all of the arguments. Simply run the below:
+Refer to the vignette above for explanations and examples of how to run the container. Briefly, running the container requires specifying the container name, the wrapper script, and then all of the arguments. Simply run the below:
 
 ```
 singularity exec escalator-v2.sif masterPRS_v4.sh [reformatting script designed (1, 2, or 3)] \
@@ -26,7 +27,7 @@ You can also run the below to get similar information on running the container:
 singularity run-help <container_name>.sif
 ```
 
-## Using the original scripts by download: 
+## If to use the original scripts by download the repo: 
 
 **Note: You will need to download this repo and edit the masterPRS_v4.sh. Then,** 
 - **unzip the prs_pipeline_bin.tar.gz file in the [bin folder](eureka_cloud_version/bin/prs_pipeline_bin.tar.gz)**
@@ -35,9 +36,8 @@ singularity run-help <container_name>.sif
 - **Comment out the same variables on lines 83 and 84.**
 
 
-Once the above steps are complete, simply run the wrapper with the required arguments. 
+Once the above steps are complete, simply run the wrapper with the required arguments, similar to the way above. 
 
-An example is below:
 ```
 # Arguments
 Bash masterPRS_v4.sh [reformatting script designed (1, 2, or 3)] \
