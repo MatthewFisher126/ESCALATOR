@@ -5,7 +5,7 @@ This repo holds the scripts and the singulairty def file of ESCALATOR. To direct
 
 ## If to create a singularity container:
 
-You can download the [escalator.def](ESCALATOR/escalator.def) file and create the container on https://cloud.sylabs.io/. You will also need singularity installed locally or on your HPC. 
+You can download the [escalator.def](escalator.def) file and create the container on https://cloud.sylabs.io/. You will also need singularity installed locally or on your HPC. 
 
 Refer to the vignette above for explanations and examples of how to run the container. Briefly, running the container requires specifying the container name, the wrapper script, and then all of the arguments. Simply run the below:
 (Note that here *"escalator-v2.sif"* can be replaced by the container image name you created)
