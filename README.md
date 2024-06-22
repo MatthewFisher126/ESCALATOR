@@ -36,7 +36,7 @@ singularity run-help <container_name>.sif
 - **Comment out the same variables on lines 83 and 84.**
 
 
-Once the above steps are complete, simply run the wrapper with the required arguments, similar to the way above. 
+Once the above steps are complete, simply run the wrapper with the required arguments similar to the way above, except for replacing "singularity exec" by "bash". 
 
 ```
 # Arguments
@@ -51,19 +51,6 @@ Bash masterPRS_v4.sh [reformatting script designed (1, 2, or 3)] \
 [path to prs_pipeline_bin (plink and liftover)] \
 [whether to remove ambiguous variants] \
 [frequency file under the input directory to impute missing genotypes, can be 'NA' if none]
-
-# Example
-bash masterPRS_format_v2_freeze3.sh 2 \
-./test_escalator/ \
-non_hla_escalator_input.txt \
-./out_escalator/ \
-GRS2_non_hla \
-./freeze3_w_dosages \
-freeze3_dosages_PAIR \
-./ESCALATOR/eureka_cloud_version/scripts/ \
-./ESCALATOR/eureka_cloud_version/bin/prs_pipeline_bin/ \
-T \
-NA
 ``` 
 
 
