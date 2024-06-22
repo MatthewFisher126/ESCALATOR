@@ -2,7 +2,7 @@
 
 Feel free to download ESCALATOR itself from this github page or you can make it into a container. The tool/container will work in a SLURM environment or locally but it is recommended to use in a SLURM environment if your data set is large.  
 
-## Using the container:
+## Using the singularity container:
 
 You can download the escalator.def file and create the container on https://cloud.sylabs.io/. You will also need singularity installed locally or on your HPC. 
 
@@ -26,13 +26,16 @@ You can also run the below to get similar information on running the container:
 singularity run-help <container_name>.sif
 ```
 
-## Using ESCALATOR by download: 
+## Using the original scripts by download: 
 
-**Note: You will need to download this repo and edit the masterPRS_v4.sh. Uncomment "script_path" and "bin_path" on lines 11 and 12 and comment out the same variables on lines 21 and 22.**
+**Note: You will need to download this repo and edit the masterPRS_v4.sh. Then,** 
+- **unzip the prs_pipeline_bin.tar.gz file in the [bin folder](eureka_cloud_version/bin/prs_pipeline_bin.tar.gz)**
+- **Uncomment "script_path" and "bin_path" on lines 13 and 14 to point to the locations of the ESCALATOR scripts as in the [scripts folder](eureka_cloud_version/scripts) and
+  unzipped binary software as in the [bin folder](eureka_cloud_version/bin/prs_pipeline_bin.tar.gz), respectively**
+- **Comment out the same variables on lines 83 and 84.**
 
-You will also need to unzip the prs_pipeline_bin.tar.gz file to access liftover and plink. 
 
-Once the above step is complete, simply run the wrapper with the required arguments. 
+Once the above steps are complete, simply run the wrapper with the required arguments. 
 
 An example is below:
 ```
